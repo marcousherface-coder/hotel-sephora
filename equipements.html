@@ -43,16 +43,8 @@
 
 <section class="amenities" style="padding-top:80px;">
   <div class="wrap">
-    <div class="amen-grid reveal-stagger">
-      <div class="amen-card"><div class="amen-icon">🕑</div><h3>Réception 24h/24</h3><p>Une équipe présente à toute heure pour votre arrivée, un renseignement ou une urgence.</p></div>
-      <div class="amen-card"><div class="amen-icon">❄️</div><h3>Climatisation</h3><p>Chaque chambre est équipée d'un climatiseur individuel réglable.</p></div>
-      <div class="amen-card"><div class="amen-icon">📶</div><h3>Wifi gratuit</h3><p>Connexion disponible dans les chambres et les espaces communs.</p></div>
-      <div class="amen-card"><div class="amen-icon">🚗</div><h3>Parking sécurisé</h3><p>Une cour fermée pour garer votre véhicule en toute tranquillité.</p></div>
-      <div class="amen-card"><div class="amen-icon">📺</div><h3>Télévision</h3><p>Un téléviseur mural dans chaque chambre et dans les salons.</p></div>
-      <div class="amen-card"><div class="amen-icon">🌿</div><h3>Jardin &amp; terrasse</h3><p>Un extérieur verdoyant pour prendre l'air entre deux visites.</p></div>
-      <div class="amen-card"><div class="amen-icon">🪟</div><h3>Chambres lumineuses</h3><p>Grandes fenêtres et rideaux occultants pour bien dormir, à toute heure.</p></div>
-      <div class="amen-card"><div class="amen-icon">🧺</div><h3>Linge fourni</h3><p>Draps et serviettes changés régulièrement pour un confort constant.</p></div>
-      <div class="amen-card"><div class="amen-icon">🧳</div><h3>Rangements généreux</h3><p>Grandes armoires en bois massif pour poser vos affaires durablement.</p></div>
+    <div id="equip-container" class="amen-grid reveal-stagger">
+      <!-- Les équipements sont chargés depuis Supabase (voir assets/supabase.js) -->
     </div>
   </div>
 </section>
@@ -96,6 +88,32 @@
 </footer>
 
 <a href="tel:+2250703051376" class="float-call" aria-label="Appeler l'hôtel">📞</a>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase.js"></script>
+<script>
+function renderEquipements(items) {
+  const container = document.getElementById('equip-container');
+
+  if (!items || items.length === 0) {
+    container.innerHTML = '<p>Aucun équipement renseigné pour le moment.</p>';
+    return;
+  }
+
+  container.innerHTML = items.map(item => `
+    <div class="amen-card"><div class="amen-icon">${item.icone || '✨'}</div><h3>${item.titre}</h3><p>${item.description || ''}</p></div>
+  `).join('');
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.16});
+  io.observe(container);
+}
+
+getEquipements().then(renderEquipements).catch(err => {
+  console.error(err);
+  document.getElementById('equip-container').innerHTML = '<p>Impossible de charger les équipements pour le moment.</p>';
+});
+</script>
 <script src="assets/main.js"></script>
 </body>
 </html>
