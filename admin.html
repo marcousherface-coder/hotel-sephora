@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace admin — Sephora Hotel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body class="admin-body">
+
+<!-- ---------- Écran de connexion ---------- -->
+<div id="loginScreen" class="admin-login">
+  <h1>Espace admin</h1>
+  <p class="sub">Sephora Hotel — accès réservé</p>
+  <form id="loginForm">
+    <div class="field">
+      <label for="login-email">E-mail</label>
+      <input type="email" id="login-email" required autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="login-pass">Mot de passe</label>
+      <input type="password" id="login-pass" required autocomplete="current-password">
+    </div>
+    <button type="submit" class="admin-btn">Se connecter</button>
+    <p id="loginErr" class="err"></p>
+  </form>
+</div>
+
+<!-- ---------- Espace admin (affiché après connexion) ---------- -->
+<div id="adminScreen" class="admin-shell" style="display:none;">
+  <div class="admin-header">
+    <div>
+      <span class="brand-sub">Sephora Hotel</span>
+      <h1>Espace admin</h1>
+    </div>
+    <button id="logoutBtn" class="admin-btn ghost small">Se déconnecter</button>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-tab="reservations">Réservations</button>
+    <button class="admin-tab" data-tab="chambres">Chambres</button>
+  </div>
+
+  <div id="tab-reservations">
+    <p id="resLoading" style="color:rgba(251,245,234,.6);">Chargement…</p>
+    <div id="resList"></div>
+  </div>
+
+  <div id="tab-chambres" style="display:none;">
+    <p id="chambresLoading" style="color:rgba(251,245,234,.6);">Chargement…</p>
+    <div id="chambresList"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase.js"></script>
+<script>
+const loginScreen = document.getElementById('loginScreen');
+const adminScreen = document.getElementById('adminScreen');
+const loginForm = document.getElementById('loginForm');
+const loginErr = document.getElementById('loginErr');
+
+async function afficherEcranSelonSession() {
+  const session = await sessionAdmin();
+  if (session) {
+    loginScreen.style.display = 'none';
+    adminScreen.style.display = 'block';
+    chargerReservations();
+    chargerChambres();
+  } else {
+    loginScreen.style.display = 'block';
+    adminScreen.style.display = 'none';
+  }
+}
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  loginErr.textContent = '';
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+
+  const result = await connexionAdmin(email, pass);
+  if (result.success) {
+    afficherEcranSelonSession();
+  } else {
+    loginErr.textContent = "E-mail ou mot de passe incorrect.";
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await deconnexionAdmin();
+  afficherEcranSelonSession();
+});
+
+// -------------------- Onglets --------------------
+
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-reservations').style.display = tab.dataset.tab === 'reservations' ? 'block' : 'none';
+    document.getElementById('tab-chambres').style.display = tab.dataset.tab === 'chambres' ? 'block' : 'none';
+  });
+});
+
+// -------------------- Réservations --------------------
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('fr-FR');
+}
+
+async function chargerReservations() {
+  const resLoading = document.getElementById('resLoading');
+  const resList = document.getElementById('resList');
+  resLoading.style.display = 'block';
+
+  const reservations = await getToutesReservations();
+  resLoading.style.display = 'none';
+
+  if (reservations.length === 0) {
+    resList.innerHTML = '<p style="color:rgba(251,245,234,.6);">Aucune réservation pour le moment.</p>';
+    return;
+  }
+
+  resList.innerHTML = reservations.map(r => `
+    <div class="res-item" data-id="${r.id}">
+      <div>
+        <h3>${r.nom}</h3>
+        <div class="meta">
+          <b>Téléphone :</b> <a href="tel:${r.telephone}" style="color:var(--mustard);">${r.telephone}</a><br>
+          ${r.email ? `<b>E-mail :</b> ${r.email}<br>` : ''}
+          <b>Chambre :</b> ${r.chambre || 'Non précisé'}<br>
+          <b>Séjour :</b> ${formatDate(r.date_arrivee)} → ${formatDate(r.date_depart)}<br>
+          ${r.message ? `<b>Message :</b> ${r.message}<br>` : ''}
+          <b>Reçue le :</b> ${formatDate(r.created_at)}
+        </div>
+        <span class="res-badge ${r.statut}">${r.statut}</span>
+      </div>
+      <select class="statut-select">
+        <option value="nouvelle" ${r.statut === 'nouvelle' ? 'selected' : ''}>Nouvelle</option>
+        <option value="confirmee" ${r.statut === 'confirmee' ? 'selected' : ''}>Confirmée</option>
+        <option value="annulee" ${r.statut === 'annulee' ? 'selected' : ''}>Annulée</option>
+      </select>
+    </div>
+  `).join('');
+
+  resList.querySelectorAll('.statut-select').forEach(select => {
+    select.addEventListener('change', async (e) => {
+      const item = e.target.closest('.res-item');
+      const id = item.dataset.id;
+      await majStatutReservation(id, e.target.value);
+      const badge = item.querySelector('.res-badge');
+      badge.className = `res-badge ${e.target.value}`;
+      badge.textContent = e.target.value;
+    });
+  });
+}
+
+// -------------------- Chambres --------------------
+
+async function chargerChambres() {
+  const chambresLoading = document.getElementById('chambresLoading');
+  const chambresList = document.getElementById('chambresList');
+  chambresLoading.style.display = 'block';
+
+  const chambres = await getChambres();
+  chambresLoading.style.display = 'none';
+
+  chambresList.innerHTML = chambres.map(c => `
+    <div class="chambre-edit" data-id="${c.id}">
+      <div class="photo-col">
+        <img src="${c.image || 'assets/room-bed-teak.jpg'}" alt="${c.nom}">
+        <input type="file" accept="image/*" class="photo-input">
+      </div>
+      <div>
+        <label>Nom</label>
+        <input type="text" class="f-nom" value="${c.nom || ''}">
+        <div class="row2">
+          <div>
+            <label>Sous-titre</label>
+            <input type="text" class="f-sous_titre" value="${c.sous_titre || ''}">
+          </div>
+          <div>
+            <label>Prix / nuit (FCFA)</label>
+            <input type="number" class="f-prix" value="${c.prix || ''}">
+          </div>
+        </div>
+        <label>Description</label>
+        <textarea class="f-description" rows="3">${c.description || ''}</textarea>
+        <label>Équipements (séparés par des virgules)</label>
+        <input type="text" class="f-equipements" value="${(c.equipements || []).join(', ')}">
+        <button class="admin-btn small save-chambre-btn" style="margin-top:14px;">Enregistrer</button>
+        <p class="chambre-save-msg"></p>
+      </div>
+    </div>
+  `).join('');
+
+  chambresList.querySelectorAll('.chambre-edit').forEach(card => {
+    const id = card.dataset.id;
+    const msg = card.querySelector('.chambre-save-msg');
+
+    card.querySelector('.save-chambre-btn').addEventListener('click', async () => {
+      msg.textContent = 'Enregistrement…';
+      msg.className = 'chambre-save-msg';
+
+      const champs = {
+        nom: card.querySelector('.f-nom').value,
+        sous_titre: card.querySelector('.f-sous_titre').value,
+        description: card.querySelector('.f-description').value,
+        prix: card.querySelector('.f-prix').value ? Number(card.querySelector('.f-prix').value) : null,
+        equipements: card.querySelector('.f-equipements').value.split(',').map(s => s.trim()).filter(Boolean),
+      };
+
+      const result = await majChambre(id, champs);
+      if (result.success) {
+        msg.textContent = 'Enregistré ✓';
+        msg.className = 'chambre-save-msg ok';
+      } else {
+        msg.textContent = "Erreur lors de l'enregistrement.";
+        msg.className = 'chambre-save-msg err';
+      }
+    });
+
+    card.querySelector('.photo-input').addEventListener('change', async (e) => {
+      const fichier = e.target.files[0];
+      if (!fichier) return;
+      msg.textContent = 'Envoi de la photo…';
+      msg.className = 'chambre-save-msg';
+
+      const uploadResult = await uploaderPhotoChambre(fichier, id);
+      if (!uploadResult.success) {
+        msg.textContent = "Erreur lors de l'envoi de la photo.";
+        msg.className = 'chambre-save-msg err';
+        return;
+      }
+
+      const majResult = await majChambre(id, { image: uploadResult.url });
+      if (majResult.success) {
+        card.querySelector('.photo-col img').src = uploadResult.url;
+        msg.textContent = 'Photo mise à jour ✓';
+        msg.className = 'chambre-save-msg ok';
+      } else {
+        msg.textContent = "Photo envoyée mais non enregistrée.";
+        msg.className = 'chambre-save-msg err';
+      }
+    });
+  });
+}
+
+afficherEcranSelonSession();
+</script>
+</body>
+</html>
