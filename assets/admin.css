@@ -51,6 +51,11 @@
 .admin-login input:focus{outline:none; border-color:var(--mustard);}
 .admin-login button{width:100%; margin-top:8px; padding:13px;}
 .admin-login .err{color:var(--coral); font-size:.82rem; margin-top:14px; min-height:1.2em;}
+.admin-link-btn{
+  display:block; margin:16px auto 0; background:none; border:none; cursor:pointer;
+  color:rgba(251,245,234,.55); font-family:inherit; font-size:.82rem; text-decoration:underline;
+}
+.admin-link-btn:hover{color:var(--mustard);}
 
 /* ---------- tabs ---------- */
 .admin-tabs{display:flex; gap:8px; margin-bottom:28px; border-bottom:1px solid rgba(251,245,234,.14);}
