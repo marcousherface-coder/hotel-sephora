@@ -44,52 +44,9 @@
 <section class="rooms" style="padding-bottom:40px;">
   <div class="wrap">
 
-    <div class="room-detail">
-      <div class="room-detail-visual reveal"><img src="assets/room-bed-teak.jpg" alt="Chambre Teck" loading="lazy"></div>
-      <div class="room-detail-copy reveal">
-        <span class="num">01 — Chambre Teck</span>
-        <h3>Lignes épurées, bois massif</h3>
-        <p>Une tête de lit en teck massif, une literie d'un blanc impeccable et une lumière douce : la chambre Teck mise sur la sobriété pour un repos sans distraction.</p>
-        <div class="feat-tags">
-          <span>Lit double</span><span>Climatisation</span><span>Salle d'eau privative</span><span>Bureau</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="room-detail rev">
-      <div class="room-detail-visual reveal"><img src="assets/room-green-bed.jpg" alt="Chambre Émeraude" loading="lazy"></div>
-      <div class="room-detail-copy reveal">
-        <span class="num">02 — Chambre Émeraude</span>
-        <h3>Une touche de couleur vive</h3>
-        <p>Couvre-lit vert éclatant, miroir en forme de soleil et coin bureau : cette chambre apporte du peps sans jamais sacrifier le confort d'un lit large et bien préparé.</p>
-        <div class="feat-tags">
-          <span>Lit king size</span><span>Miroir déco</span><span>Coin bureau</span><span>Climatisation</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="room-detail">
-      <div class="room-detail-visual reveal"><img src="assets/bathroom.jpg" alt="Chambre Confort" loading="lazy"></div>
-      <div class="room-detail-copy reveal">
-        <span class="num">03 — Chambre Confort</span>
-        <h3>Pensée pour les séjours studieux</h3>
-        <p>Bureau avec chaise, télévision murale et grande fenêtre : la chambre Confort s'adresse aux voyageurs qui ont besoin de travailler ou de se poser quelques jours.</p>
-        <div class="feat-tags">
-          <span>Bureau &amp; chaise</span><span>Télévision murale</span><span>Climatisation</span><span>Grande fenêtre</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="room-detail rev">
-      <div class="room-detail-visual reveal"><img src="assets/room-wardrobe.jpg" alt="Rangements sur mesure" loading="lazy"></div>
-      <div class="room-detail-copy reveal">
-        <span class="num">04 — Dans chaque chambre</span>
-        <h3>Des rangements sur mesure</h3>
-        <p>Grande armoire à portes persiennes en bois massif : de quoi déballer vos valises et vous installer, même pour un séjour prolongé.</p>
-        <div class="feat-tags">
-          <span>Grande armoire</span><span>Porte-serviettes</span><span>Sol carrelé</span>
-        </div>
-      </div>
+    <div id="chambres-container">
+      <!-- Les chambres sont chargées depuis Supabase (voir assets/supabase.js) -->
+      <p style="color:rgba(251,245,234,.6); padding:40px 0;">Chargement des chambres…</p>
     </div>
 
   </div>
@@ -122,6 +79,51 @@
 </footer>
 
 <a href="tel:+2250703051376" class="float-call" aria-label="Appeler l'hôtel">📞</a>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase.js"></script>
+<script>
+function renderChambres(chambres) {
+  const container = document.getElementById('chambres-container');
+
+  if (!chambres || chambres.length === 0) {
+    container.innerHTML = '<p style="color:rgba(251,245,234,.6); padding:40px 0;">Aucune chambre disponible pour le moment. Contactez-nous directement.</p>';
+    return;
+  }
+
+  container.innerHTML = chambres.map((chambre, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    const reversed = i % 2 === 1 ? ' rev' : '';
+    const tags = (chambre.equipements || []).map(tag => `<span>${tag}</span>`).join('');
+    const prix = chambre.prix ? `<p style="color:var(--mustard); font-weight:700; margin-bottom:16px;">${chambre.prix} FCFA / nuit</p>` : '';
+
+    return `
+    <div class="room-detail${reversed}">
+      <div class="room-detail-visual reveal"><img src="${chambre.image || 'assets/room-bed-teak.jpg'}" alt="${chambre.nom}" loading="lazy"></div>
+      <div class="room-detail-copy reveal">
+        <span class="num">${num} — ${chambre.nom}</span>
+        <h3>${chambre.sous_titre || ''}</h3>
+        <p>${chambre.description || ''}</p>
+        ${prix}
+        <div class="feat-tags">${tags}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Réactive les animations reveal sur les nouveaux éléments
+  // (l'observer de assets/main.js a déjà tourné avant que ces
+  // éléments existent, donc on en crée un dédié ici)
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.16});
+  container.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}
+
+getChambres().then(renderChambres).catch(err => {
+  console.error(err);
+  document.getElementById('chambres-container').innerHTML =
+    '<p style="color:rgba(251,245,234,.6); padding:40px 0;">Impossible de charger les chambres pour le moment.</p>';
+});
+</script>
 <script src="assets/main.js"></script>
 </body>
 </html>
