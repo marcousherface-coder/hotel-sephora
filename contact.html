@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Sephora Hotel Bouaflé</title>
+<meta name="description" content="Contactez Sephora Hotel à Bouaflé : téléphone, e-mail et adresse. Réception ouverte 24h/24, 7j/7.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="curtain" id="curtain"></div>
+
+<header id="siteHeader" data-solid="true">
+  <nav>
+    <a href="index.html" class="brand"><img src="assets/logo.png" alt="Sephora Hotel"> Sephora Hotel</a>
+    <ul class="navlinks" id="navLinks">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="hotel.html">L'hôtel</a></li>
+      <li><a href="chambres.html">Chambres</a></li>
+      <li><a href="espaces.html">Espaces</a></li>
+      <li><a href="equipements.html">Équipements</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
+    </ul>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <a href="tel:+2250703051376" class="btn btn-coral navphone">Réserver · 07 03 05 13 76</a>
+      <button class="navburger" id="burger" aria-label="Ouvrir le menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+</header>
+
+<section class="pagehero">
+  <div class="pagehero-bg" style="background-image:url('assets/reception-clocks.jpg');"></div>
+  <div class="pagehero-content">
+    <span class="eyebrow">Contact</span>
+    <h1>Planifiez votre étape à Bouaflé</h1>
+    <p>Par téléphone, par mail ou directement à la réception, notre équipe reste disponible pour organiser votre séjour.</p>
+    <p class="crumb"><a href="index.html">Accueil</a> — Contact</p>
+  </div>
+</section>
+
+<section class="contact" style="padding-top:80px;">
+  <div class="wrap">
+    <div class="contact-grid">
+      <div class="reveal">
+        <div class="info-list">
+          <div class="info-row">
+            <div class="info-icon">📍</div>
+            <div><h4>Adresse</h4><p>Bouaflé, Côte d'Ivoire</p></div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">📞</div>
+            <div><h4>Téléphone</h4><a href="tel:+2250703051376">07 03 05 13 76</a></div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">✉️</div>
+            <div><h4>E-mail</h4><a href="mailto:sephorahotelbouafle01@gmail.com">sephorahotelbouafle01@gmail.com</a></div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">🛎️</div>
+            <div><h4>Réception</h4><p>Ouverte 24h/24, 7j/7</p></div>
+          </div>
+        </div>
+        <a href="mailto:sephorahotelbouafle01@gmail.com" class="btn btn-coral btn-wide">Envoyer un e-mail</a>
+
+        <div class="map-embed reveal">
+          <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-5.8000%2C6.9700%2C-5.7200%2C7.0400&layer=mapnik&marker=7.0122%2C-5.7444" title="Localisation de Sephora Hotel à Bouaflé" loading="lazy"></iframe>
+        </div>
+      </div>
+      <div class="clock-panel reveal">
+        <p>À la réception, quatre horloges veillent sur nos hôtes en déplacement.</p>
+        <div class="clocks">
+          <div class="clock">
+            <div class="clockface"><div class="hand hour" style="transform:rotate(45deg)"></div><div class="hand min" style="transform:rotate(180deg)"></div></div>
+            <span>Bouaflé</span><strong>GMT</strong>
+          </div>
+          <div class="clock">
+            <div class="clockface"><div class="hand hour" style="transform:rotate(310deg)"></div><div class="hand min" style="transform:rotate(60deg)"></div></div>
+            <span>Paris</span><strong>GMT+1/2</strong>
+          </div>
+          <div class="clock">
+            <div class="clockface"><div class="hand hour" style="transform:rotate(220deg)"></div><div class="hand min" style="transform:rotate(300deg)"></div></div>
+            <span>New York</span><strong>GMT-4/5</strong>
+          </div>
+          <div class="clock">
+            <div class="clockface"><div class="hand hour" style="transform:rotate(150deg)"></div><div class="hand min" style="transform:rotate(120deg)"></div></div>
+            <span>Tokyo</span><strong>GMT+9</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <a href="index.html" class="foot-brand"><img src="assets/logo.png" alt="Sephora Hotel"> Sephora Hotel</a>
+    <div class="foot-links">
+      <a href="hotel.html">L'hôtel</a>
+      <a href="chambres.html">Chambres</a>
+      <a href="espaces.html">Espaces</a>
+      <a href="equipements.html">Équipements</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <p>© <span id="year"></span> Sephora Hotel — Bouaflé, Côte d'Ivoire</p>
+  </div>
+</footer>
+
+<a href="tel:+2250703051376" class="float-call" aria-label="Appeler l'hôtel">📞</a>
+<script src="assets/main.js"></script>
+</body>
+</html>
